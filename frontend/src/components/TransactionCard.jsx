@@ -3,7 +3,6 @@
 import React from "react";
 import styled from "styled-components";
 
-// Стиль для карточки транзакции
 const CardContainer = styled.div`
   background-color: #fff;
   border-radius: 8px;
@@ -22,13 +21,11 @@ const CardContainer = styled.div`
   }
 `;
 
-// Название транзакции
 const TransactionName = styled.div`
   font-size: 16px;
   color: #333;
 `;
 
-// Сумма транзакции
 const TransactionAmount = styled.div`
   font-size: 16px;
   font-weight: bold;

@@ -91,7 +91,7 @@ const SignOutButton = styled.button`
   cursor: pointer;
   transition: color 0.2s;
   padding: 10px 0;
-  margin-left: 0px; // Добавьте этот стиль
+  margin-left: 0px; 
 
   &:hover {
     color: #007bff;
@@ -103,7 +103,7 @@ const SignOutButton = styled.button`
 `;
 
 const SignOutContainer = styled.div`
-  padding-left: 10px; // То же значение, что и у других элементов
+  padding-left: 10px; 
   display: flex;
   align-items: center;
 `;

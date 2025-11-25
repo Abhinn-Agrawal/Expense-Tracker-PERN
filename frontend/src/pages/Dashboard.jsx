@@ -115,7 +115,6 @@ const Dashboard = () => {
         allTransactions();
     }, []);
 
-    // Функция для суммирования значений на одинаковые даты
     const sumByDate = (data) => {
         return data.reduce((acc, item) => {
             if (!acc[item.date]) {
@@ -129,43 +128,40 @@ const Dashboard = () => {
     const groupedIncomes = sumByDate(incomes);
     const groupedExpenses = sumByDate(expenses);
 
-    // Функция для объединения дат доходов и расходов в единый массив
     const mergeDates = () => {
         const allDates = [
             ...new Set([...Object.keys(groupedIncomes), ...Object.keys(groupedExpenses)])
         ];
-        allDates.sort((a, b) => new Date(a) - new Date(b)); // Сортируем даты
+        allDates.sort((a, b) => new Date(a) - new Date(b)); 
         return allDates;
     };
 
     const mergedDates = mergeDates();
 
-    // Подготовка данных для графика доходов
     const incomeData = mergedDates.map(date => groupedIncomes[date] || null);
 
-    // Подготовка данных для графика расходов
     const expenseData = mergedDates.map(date => groupedExpenses[date] || null);
 
     const graph = {
-        labels: mergedDates, // Все уникальные даты
+        labels: mergedDates, 
         datasets: [
             {
-                label: 'Доходы',
+                label: 'Income',
                 data: incomeData,
                 backgroundColor: 'green',
                 borderColor: 'green',
                 fill: false,
                 tension: 0.4,
-                spanGaps: true // Соединять пропуски
+                spanGaps: true 
             },
             {
-                label: 'Расходы',
+                label: 'Expense',
                 data: expenseData,
                 backgroundColor: 'red',
                 borderColor: 'red',
                 fill: false,
                 tension: 0.4,
-                spanGaps: true // Соединять пропуски
+                spanGaps: true 
             }
         ]
     };

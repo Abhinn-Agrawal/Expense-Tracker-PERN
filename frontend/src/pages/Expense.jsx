@@ -192,7 +192,7 @@ const Expense = () => {
         title: '',
         amount: '',
         date: '',
-        category: 'Прочие расходы',
+        category: 'Other Expenses',
         description: ''
     })
 

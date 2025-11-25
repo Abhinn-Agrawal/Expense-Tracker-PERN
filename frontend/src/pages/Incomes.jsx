@@ -186,7 +186,7 @@ const Incomes = () => {
         title: '',
         amount: '',
         date: '',
-        category: 'Прочие расходы',
+        category: 'Other Income',
         description: ''
     })
     const {incomes, createNewIncome , getAllIncomes, deleteIncomes, totalIncomes} = useGlobalContext()

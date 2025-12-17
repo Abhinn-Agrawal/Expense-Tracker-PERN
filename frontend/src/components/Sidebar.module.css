@@ -1,0 +1,87 @@
+.sidebar {
+  width: 240px;
+  background-color: #f8f9fa;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 20px 10px;
+  border-right: 1px solid #e0e0e0;
+}
+
+.profile {
+  display: flex;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #e0e0e0;
+  margin-right: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.userInfo {
+  font-size: 14px;
+  color: #333;
+}
+
+.userName {
+  font-weight: bold;
+}
+
+.navList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.navLink {
+  text-decoration: none;
+  color: inherit;
+}
+
+.navItem {
+  padding: 10px 0;
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+  color: #333;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.navItem svg {
+  margin-right: 10px;
+}
+
+.navItem:hover {
+  color: #007bff;
+}
+
+.signOut {
+  padding-left: 10px;
+}
+
+.signOutBtn {
+  background: none;
+  border: none;
+  font-size: 16px;
+  color: #333;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s;
+}
+
+.signOutBtn svg {
+  margin-right: 10px;
+}
+
+.signOutBtn:hover {
+  color: #007bff;
+}

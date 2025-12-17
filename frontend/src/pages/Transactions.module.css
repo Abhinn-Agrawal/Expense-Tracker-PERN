@@ -1,0 +1,59 @@
+.container {
+  padding: 20px;
+  width: 100%;
+}
+
+.header {
+  margin-bottom: 20px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.item {
+  background: #fff;
+  padding: 15px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.info {
+  display: flex;
+  gap: 12px;
+}
+
+.icon {
+  background: #f0f0f0;
+  padding: 10px;
+  border-radius: 50%;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+}
+
+.edit {
+  color: #007bff;
+  cursor: pointer;
+}
+
+.edit:hover {
+  color: #0056b3;
+}
+
+.delete {
+  color: #dc3545;
+  cursor: pointer;
+}
+
+.delete:hover {
+  color: #a71d2a;
+}

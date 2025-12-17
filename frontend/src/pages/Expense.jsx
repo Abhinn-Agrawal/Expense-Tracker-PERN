@@ -1,274 +1,136 @@
-import React, {useEffect, useState} from 'react';
-import { useGlobalContext } from '../context/context.jsx';
-import {createNewExpense, deleteExpense, deleteIncomes, getAllExpenses, getAllIncomes} from '../api/api.js'
-import styled from 'styled-components';
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import {
-    faGlobe,
-    faPiggyBank,
-    faCode,
-    faTrashAlt,
-    faBriefcase,
-    faBook,
-    faMusic,
-    faFilm,
-    faCamera,
-    faPaintBrush,
-} from '@fortawesome/free-solid-svg-icons';
+import React, { useState, useEffect } from 'react';
+import {createNewExpense, updateExpense} from '../service/api.js'
 import Sidebar from "../components/Sidebar.jsx";
-
-const IncomePageContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  padding: 20px;
-  background-color: #f9f9f9;
-  width: 100%;
-`;
-
-const Header = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-`;
-
-const Title = styled.h1`
-  font-size: 24px;
-  color: #333;
-`;
-
-const TotalIncome = styled.div`
-  font-size: 24px;
-  color: #00a300;
-`;
-
-const ContentContainer = styled.div`
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-`;
-
-const IncomeForm = styled.div`
-  display: flex;
-  flex-direction: column;
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  flex: 1;
-  max-width: 400px;
-`;
-
-const FormField = styled.div`
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 15px;
-`;
-
-const Label = styled.label`
-  font-size: 14px;
-  color: #666;
-  margin-bottom: 5px;
-`;
-
-const Input = styled.input`
-  padding: 10px;
-  font-size: 16px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  outline: none;
-
-  &:focus {
-    border-color: #007bff;
-  }
-`;
-
-const Select = styled.select`
-  padding: 10px;
-  font-size: 16px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  outline: none;
-
-  &:focus {
-    border-color: #007bff;
-  }
-`;
-
-const AddIncomeButton = styled.button`
-  padding: 10px 20px;
-  font-size: 16px;
-  color: #fff;
-  background-color: #ff4757;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-
-  &:hover {
-    background-color: #e84357;
-  }
-`;
-
-const IncomeList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  flex: 2;
-  max-width: calc(100% - 400px);
-  max-height: 600px; /* Fixed height for scrolling */
-  overflow-y: auto; /* Enable vertical scrolling */
-  padding-right: 10px; /* To ensure scrollbar does not overlay the list */
-
-  &::-webkit-scrollbar {
-    width: 8px; /* Scrollbar width */
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background-color: #ddd; /* Scrollbar thumb color */
-    border-radius: 4px; /* Rounded scrollbar thumb */
-  }
-`;
-
-const IncomeItem = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background-color: #fff;
-  padding: 15px;
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-`;
-
-const IncomeInfo = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 10px;
-`;
-
-const IconWrapper = styled.div`
-  background-color: #f0f0f0;
-  padding: 10px;
-  border-radius: 50%;
-`;
-
-const IncomeDetails = styled.div`
-  display: flex;
-  flex-direction: column;
-`;
-
-const IncomeTitle = styled.h3`
-  font-size: 20px;
-  color: #333;
-  margin-bottom: 5px;
-`;
-
-
-const IncomeDescription = styled.p`
-  font-size: 17px;
-  color: #666;
-  margin-top: 0;
-  margin-bottom: 5px;
-`;
-
-const IncomeAmount = styled.div`
-  font-size: 18px;
-  color: #333;
-`;
-
-const DeleteButton = styled.button`
-  border: none;
-  background: transparent;
-  color: #ff4757;
-  cursor: pointer;
-
-  &:hover {
-    color: #e84357;
-  }
-`;
+import styles from "./Expense.module.css";
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const Expense = () => {
-    const {expenses, createNewExpense , getAllExpenses, deleteExpense, totalExpenses} = useGlobalContext()
-    const [newExpense, setNewExpense] = useState({
-        title: '',
-        amount: '',
-        date: '',
-        category: 'Other Expenses',
-        description: ''
-    })
 
-    useEffect(() => {
-        getAllExpenses()
-    }, []);
+  const location = useLocation();
+  const navigate = useNavigate(); 
+  const isEdit = location.state?.isEdit;
+  const editData = location.state?.data;
 
-    return (
-        <>
-            <Sidebar></Sidebar>
-            <IncomePageContainer>
-                <Header>
-                    <Title>Expenses</Title>
-                    <TotalIncome>Total Expense: {totalExpenses()}</TotalIncome>
-                </Header>
-                <ContentContainer>
-                    <IncomeForm>
-                        <FormField>
-                            <Label>Expense Title</Label>
-                            <Input type="text" placeholder="Salary Title"
-                                   onChange={e => setNewExpense({...newExpense, title: e.target.value})}/>
-                        </FormField>
-                        <FormField>
-                            <Label>Expense Amount</Label>
-                            <Input type="number" placeholder="Salary Amount"
-                                   onChange={e => setNewExpense({...newExpense, amount: e.target.value})}/>
-                        </FormField>
-                        <FormField>
-                            <Label>Enter A Date</Label>
-                            <Input type="date" onChange={e => setNewExpense({...newExpense, date: e.target.value})}/>
-                        </FormField>
-                        <FormField>
-                            <Label>Select Option</Label>
-                            <Select onChange={e => setNewExpense({ ...newExpense, category: e.target.value })}>
-                                <option value="" selected disabled hidden>Select a category</option>
-                                <option value="Food">Food</option>
-                                <option value="Home">Home</option>
-                                <option value="Transport">Transport</option>
-                                <option value="Other Expenses">Other Expenses</option>
-                            </Select>
+  const [newExpense, setNewExpense] = useState({
+    title: "",
+    amount: "",
+    date: "",
+    category: "Other Expenses",
+    description: "",
+  });
 
-                        </FormField>
-                        <FormField>
-                            <Label>Add A Reference</Label>
-                            <Input type="text" placeholder="Add A Reference"
-                                   onChange={e => setNewExpense({...newExpense, description: e.target.value})}/>
-                        </FormField>
-                        <AddIncomeButton onClick={() => createNewExpense(newExpense)}>+ Add Expense</AddIncomeButton>
-                    </IncomeForm>
+  useEffect(() => {
+      if (isEdit && editData) {
+        setNewExpense({
+          title: editData.title || "",
+          amount: editData.amount || "",
+          date: editData.date?.split("T")[0] || "",
+          category: editData.category || "Other Income",
+          description: editData.description || "",
+        });
+      }
+    }, [isEdit, editData]);
 
-                    <IncomeList>
-                        {expenses.map((item) => (
-                            <IncomeItem key={item.id}>
-                                <IncomeInfo>
-                                    <IconWrapper>
-                                        <FontAwesomeIcon icon={faGlobe} color="#007bff"/>
-                                    </IconWrapper>
-                                    <IncomeDetails>
-                                        <IncomeTitle>Title: {item.title}</IncomeTitle>
-                                        <IncomeDescription>Category: {item.category}</IncomeDescription>
-                                        <IncomeDescription>
-                                            Amount: {item.amount} Rs • Data: {item.date} • Description: {item.description}
-                                        </IncomeDescription>
-                                    </IncomeDetails>
-                                </IncomeInfo>
-                                <DeleteButton>
-                                    <FontAwesomeIcon icon={faTrashAlt} onClick={() => deleteExpense(item.id)}/>
-                                </DeleteButton>
-                            </IncomeItem>
-                        ))}
-                    </IncomeList>
+  /* ---------------- HANDLERS ---------------- */
+  const handleSubmit = async () => {
+      if (isEdit) {
+        await updateExpense(editData.id, newExpense);
+        navigate("/transactions");
+      } else {
+        await createNewExpense(newExpense);
+      }
+  
+      // reset form
+      setNewExpense({
+        title: "",
+        amount: "",
+        date: "",
+        category: "Other Income",
+        description: "",
+      });
+  };
 
-                </ContentContainer>
-            </IncomePageContainer>
-        </>
-    );
+  return (
+    <>
+      <Sidebar />
+
+      <div className={styles.container}>
+        <div className={styles.header}>
+          <h1>Expense</h1>
+        </div>
+
+        <div className={styles.content}>
+          <div className={styles.form}>
+            <label>
+              Expense Title
+              <input
+                type="text"
+                value={newExpense.title}
+                onChange={(e) =>
+                  setNewExpense({ ...newExpense, title: e.target.value })
+                }
+              />
+            </label>
+
+            <label>
+              Expense Amount
+              <input
+                type="number"
+                value={newExpense.amount}
+                onChange={(e) =>
+                  setNewExpense({ ...newExpense, amount: e.target.value })
+                }
+              />
+            </label>
+
+            <label>
+              Date
+              <input
+                type="date"
+                value={newExpense.date}
+                onChange={(e) =>
+                  setNewExpense({ ...newExpense, date: e.target.value })
+                }
+              />
+            </label>
+
+            <label>
+              Category
+              <select
+                value={newExpense.category}
+                onChange={(e) =>
+                  setNewExpense({ ...newExpense, category: e.target.value })
+                }
+              >
+                <option value="Food">Food</option>
+                <option value="Home">Home</option>
+                <option value="Transport">Transport</option>
+                <option value="Other Expenses">Other Expenses</option>
+              </select>
+            </label>
+
+            <label>
+              Description
+              <input
+                type="text"
+                value={newExpense.description}
+                onChange={(e) =>
+                  setNewExpense({
+                    ...newExpense,
+                    description: e.target.value,
+                  })
+                }
+              />
+            </label>
+
+            <button onClick={handleSubmit}>
+              {(isEdit) ? "Update Expense" :"+ Add Expense"}
+            </button>
+          </div>
+        </div>
+      </div>
+    </>
+  );
 };
 
 export default Expense;

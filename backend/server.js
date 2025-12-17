@@ -1,35 +1,31 @@
-const express = require('express')
-const app = express()
-const sequelize = require('./db/db')
-const  bodyParser = require('body-parser')
-app.use(express.json())
-const cors = require('cors')
-require('dotenv').config()
-const incomeRouter = require('./routes/incomes')
-const expenseRouter = require('./routes/expenses')
-const PORT = process.env.PORT || 5000
-const models = require('./models/models')
-const corsOptions ={
-    origin: '*',
-}
-app.use(cors(corsOptions))
-app.use('/incomes', incomeRouter)
-app.use('/expenses', expenseRouter)
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
 
-app.get('/', (req, res) => {
-    return res.sendStatus(200)
-})
-const startApp = async () => {
-    try{
-        await sequelize.authenticate()
-        await sequelize.sync()
-        app.listen(PORT)
-    }
-    catch (err){
-        console.log(err)
-    }
-}
+import incomeRouter from "./routes/incomes.js";
+import expenseRouter from "./routes/expenses.js";
+import transactionRouter from "./routes/transactions.js"
 
-startApp().then(()=> {
-    console.log(`Server listening on http://localhost:${PORT}`)
-})
+dotenv.config();
+
+const app = express();
+const PORT = process.env.PORT || 5000;
+
+// Middleware
+app.use(express.json());
+app.use(cors({ origin: "*" }));
+
+// Routes
+app.use("/incomes", incomeRouter);
+app.use("/expenses", expenseRouter);
+app.use("/transactions", transactionRouter);
+
+// Health check
+app.get("/", (req, res) => {
+  res.status(200).json({ status: "Server is running" });
+});
+
+// Start server
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
+});

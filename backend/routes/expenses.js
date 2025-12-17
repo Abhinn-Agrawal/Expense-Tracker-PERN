@@ -1,8 +1,14 @@
-const router = require('express').Router();
-const expenseController = require('../controllers/expenseController')
-router.get('/get-expenses', expenseController.getAllExpenses)
-router.post('/add-expense', expenseController.createNewExpense )
-router.delete('/delete-expense/:id', expenseController.deleteExpense)
-router.get('/allTransactions', expenseController.getAllTransactions)
+import { Router } from "express";
+import createExpense from "../controllers/expense/createExpense.js";
+import getAllExpenses from "../controllers/expense/getAllExpenses.js";
+import deleteExpense from "../controllers/expense/deleteExpense.js";
+import updateExpense from "../controllers/expense/updateExpense.js";
 
-module.exports = router;
+const router = Router();
+
+router.post("/add-expense", createExpense);
+router.get("/get-expenses", getAllExpenses);
+router.delete("/delete-expense/:id", deleteExpense);
+router.put("/update-expense/:id", updateExpense);
+
+export default router;

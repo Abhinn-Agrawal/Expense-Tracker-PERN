@@ -1,9 +1,11 @@
 import prisma from "../prismaClient.js";
 
-export default async function getAlltransaction(req, res){
+export default async function getAllTransactions(req, res) {
+  const userId = req.userId;
+
   const [incomes, expenses] = await Promise.all([
-    prisma.income.findMany(),
-    prisma.expense.findMany(),
+    prisma.income.findMany({ where: { userId } }),
+    prisma.expense.findMany({ where: { userId } }),
   ]);
 
   const transactions = [
@@ -11,5 +13,5 @@ export default async function getAlltransaction(req, res){
     ...expenses.map((e) => ({ ...e, type: "expense" })),
   ].sort((a, b) => new Date(b.date) - new Date(a.date));
 
-  return res.json(transactions);
-};
+  res.json(transactions);
+}

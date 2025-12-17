@@ -2,15 +2,20 @@ import prisma from "../../prismaClient.js";
 
 export default async function deleteIncome(req, res) {
   try {
-    const { id } = req.params;
+    const id = Number(req.params.id);
+    const userId = req.userId;
 
-    await prisma.income.delete({
-      where: { id: Number(id) },
+    const deleted = await prisma.income.deleteMany({
+      where: { id, userId },
     });
 
-    return res.sendStatus(204);
+    if (deleted.count === 0) {
+      return res.status(404).json({ message: "Income not found" });
+    }
+
+    return res.json({ message: "Income deleted" });
   } catch (error) {
     console.error("Delete income error:", error);
-    return res.status(500).json({ error: "Failed to delete income" });
+    return res.status(500).json({ message: "Failed to delete income" });
   }
-};
+}

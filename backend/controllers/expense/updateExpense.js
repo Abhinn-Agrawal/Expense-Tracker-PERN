@@ -1,27 +1,28 @@
 import prisma from "../../prismaClient.js";
 
-export default async function updateExpense(req, res){
+export default async function updateExpense(req, res) {
   try {
     const id = Number(req.params.id);
+    const userId = req.userId;
     const { title, amount, date, category, description } = req.body;
 
-    const updatedExpense = await prisma.expense.update({
-      where: { id },
+    const updated = await prisma.expense.updateMany({
+      where: { id, userId },
       data: {
         title,
-        amount: amount !== undefined ? Number(amount) : undefined,
-        date: date ? new Date(date) : undefined,
+        amount: Number(amount),
+        date: new Date(date),
         category,
         description,
       },
     });
 
-    return res.status(200).json(updatedExpense);
-  } catch (error) {
-    console.error("Update expense error:", error);
+    if (updated.count === 0) {
+      return res.status(404).json({ message: "Expense not found" });
+    }
 
-    return res.status(404).json({
-      message: "Expense not found or update failed",
-    });
+    return res.json({ message: "Expense updated" });
+  } catch (err) {
+    return res.status(500).json({ message: "Failed to update expense" });
   }
-};
+}

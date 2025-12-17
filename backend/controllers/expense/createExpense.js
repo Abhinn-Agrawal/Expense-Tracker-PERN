@@ -3,6 +3,7 @@ import prisma from "../../prismaClient.js";
 export default async function createExpense(req, res) {
   try {
     const { title, amount, date, category, description } = req.body;
+    const userId = req.userId;
 
     if (!title || !amount || !date || !category) {
       return res.status(400).json({ message: "Missing required fields" });
@@ -15,6 +16,7 @@ export default async function createExpense(req, res) {
         date: new Date(date),
         category,
         description,
+        userId,
       },
     });
 
@@ -23,4 +25,4 @@ export default async function createExpense(req, res) {
     console.error(err);
     return res.status(500).json({ message: "Internal server error" });
   }
-};
+}

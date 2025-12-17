@@ -1,6 +1,7 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 import styles from "./Sidebar.module.css";
+import { getUser, clearAuth } from "../Utils/auth";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -13,6 +14,8 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 
 const Sidebar = () => {
+  const user = getUser();
+
   return (
     <div className={styles.sidebar}>
       <div>
@@ -23,8 +26,7 @@ const Sidebar = () => {
           </div>
 
           <div className={styles.userInfo}>
-            <div className={styles.userName}>Abhinn</div>
-            <div>Your Money</div>
+            <div className={styles.userName}>{user?.username}</div>
           </div>
         </div>
 
@@ -62,7 +64,11 @@ const Sidebar = () => {
 
       {/* -------- SIGN OUT -------- */}
       <div className={styles.signOut}>
-        <button className={styles.signOutBtn}>
+        <button className={styles.signOutBtn} 
+          onClick={() => {
+          clearAuth();
+          window.location.href = "/login";
+        }}>
           <FontAwesomeIcon icon={faSignOutAlt} />
           Sign Out
         </button>

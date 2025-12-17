@@ -7,6 +7,15 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  password  String
+  incomes   Income[]
+  expenses  Expense[]
+  createdAt DateTime @default(now())
+}
+
 model Income {
   id          Int      @id @default(autoincrement())
   title       String
@@ -14,6 +23,8 @@ model Income {
   date        DateTime
   category    String
   description String?
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
 }
 
 model Expense {
@@ -23,4 +34,6 @@ model Expense {
   date        DateTime
   category    String
   description String?
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
 }

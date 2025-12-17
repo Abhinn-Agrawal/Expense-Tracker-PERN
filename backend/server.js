@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import incomeRouter from "./routes/incomes.js";
 import expenseRouter from "./routes/expenses.js";
 import transactionRouter from "./routes/transactions.js"
+import authRoutes from "./routes/auth.js";
 
 dotenv.config();
 
@@ -19,6 +20,7 @@ app.use(cors({ origin: "*" }));
 app.use("/incomes", incomeRouter);
 app.use("/expenses", expenseRouter);
 app.use("/transactions", transactionRouter);
+app.use("/auth", authRoutes);
 
 // Health check
 app.get("/", (req, res) => {

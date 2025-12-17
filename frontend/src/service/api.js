@@ -4,6 +4,29 @@ const API = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
 });
 
+API.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token");
+
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+export const signup = async (data) => {
+  const res = await API.post("/auth/signup", data);
+  return res.data;
+};
+
+export const login = async (data) => {
+  const res = await API.post("/auth/login", data);
+  return res.data;
+};
+
 export const getAllTransactions = async() => {
     try{
         const res = await API.get("/transactions/transactions");

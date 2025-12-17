@@ -1,262 +1,210 @@
-import React, { useEffect } from "react";
-import styled from "styled-components";
+import React, { useEffect, useMemo } from "react";
 import Sidebar from "../components/Sidebar.jsx";
-import { useGlobalContext } from "../context/context.jsx";
+import styles from "./Dashboard.module.css";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchExpenses, fetchIncomes } from "../store/financeSlice";
+import formatDate from "../Utils/formatDate.js";
 import {
-    Chart as ChartJs,
-    CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    Title,
-    Tooltip,
-    Legend,
-    ArcElement,
-    RadialLinearScale
-} from 'chart.js';
-import { Line,Doughnut } from 'react-chartjs-2';
+  Chart as ChartJs,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+  RadialLinearScale,
+} from "chart.js";
+
+import { Line, Doughnut } from "react-chartjs-2";
 
 ChartJs.register(
-    CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    Title,
-    Tooltip,
-    Legend,
-    ArcElement,
-    RadialLinearScale
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+  RadialLinearScale
 );
 
-const DashboardContainer = styled.div`
-    display: flex;
-    justify-content: space-between;
-    padding: 20px;
-    background-color: #f8f9fa;
-    flex: 1;
-`;
-
-const LeftSection = styled.div`
-    display: flex;
-    flex-direction: column;
-    width: 50%;
-    padding-right: 20px;
-`;
-
-const RightSection = styled.div`
-    display: flex;
-    flex-direction: column;
-    width: 50%;
-    padding-left: 20px;
-`;
-
-const GraphPlaceholder = styled.div`
-    height: 400px;
-    background-color: #eaeaea;
-    border-radius: 8px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 22px;
-    color: #666;
-    margin-bottom: 20px;
-`;
-
-const StatsContainer = styled.div`
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-`;
-
-const Card = styled.div`
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    transition: transform 0.2s, box-shadow 0.2s;
-
-    &:hover {
-        transform: scale(1.02);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-    }
-`;
-
-const CardTitle = styled.h3`
-    font-size: 18px;
-    color: #333;
-    margin-bottom: 10px;
-    text-align: center;
-`;
-
-const CardValue = styled.div`
-    font-size: 24px;
-    font-weight: bold;
-    color: ${(props) => props.color || "#333"};
-`;
-
 const Dashboard = () => {
-    const {
-        incomes,
-        expenses,
-        getAllIncomes,
-        getAllExpenses,
-        totalIncomes,
-        totalExpenses,
-        totalBalance,
-        allTransactions
-    } = useGlobalContext();
+  const dispatch = useDispatch();
 
-    useEffect(() => {
-        getAllExpenses();
-        getAllIncomes();
-        allTransactions();
-    }, []);
+  const { incomes, expenses, loading } = useSelector(
+    (state) => state.finance
+  );
 
-    const sumByDate = (data) => {
-        return data.reduce((acc, item) => {
-            if (!acc[item.date]) {
-                acc[item.date] = 0;
-            }
-            acc[item.date] += item.amount;
-            return acc;
-        }, {});
-    };
+  /* ---------------- FETCH DATA ---------------- */
+  useEffect(() => {
+    dispatch(fetchExpenses());
+    dispatch(fetchIncomes());
+  }, [dispatch]);
 
-    const groupedIncomes = sumByDate(incomes);
-    const groupedExpenses = sumByDate(expenses);
+  /* ---------------- DERIVED VALUES ---------------- */
+  const totalIncomes = useMemo(
+    () => incomes.reduce((sum, i) => sum + i.amount, 0),
+    [incomes]
+  );
 
-    const mergeDates = () => {
-        const allDates = [
-            ...new Set([...Object.keys(groupedIncomes), ...Object.keys(groupedExpenses)])
-        ];
-        allDates.sort((a, b) => new Date(a) - new Date(b)); 
-        return allDates;
-    };
+  const totalExpenses = useMemo(
+    () => expenses.reduce((sum, e) => sum + e.amount, 0),
+    [expenses]
+  );
 
-    const mergedDates = mergeDates();
+  const totalBalance = totalIncomes - totalExpenses;
 
-    const incomeData = mergedDates.map(date => groupedIncomes[date] || null);
+  /* ---------------- GRAPH DATA ---------------- */
+  const sumByDate = (data) =>
+    data.reduce((acc, item) => {
+      acc[item.date] = (acc[item.date] || 0) + item.amount;
+      return acc;
+    }, {});
 
-    const expenseData = mergedDates.map(date => groupedExpenses[date] || null);
+  const groupedIncomes = sumByDate(incomes);
+  const groupedExpenses = sumByDate(expenses);
 
-    const graph = {
-        labels: mergedDates, 
-        datasets: [
-            {
-                label: 'Income',
-                data: incomeData,
-                backgroundColor: 'green',
-                borderColor: 'green',
-                fill: false,
-                tension: 0.4,
-                spanGaps: true 
-            },
-            {
-                label: 'Expense',
-                data: expenseData,
-                backgroundColor: 'red',
-                borderColor: 'red',
-                fill: false,
-                tension: 0.4,
-                spanGaps: true 
-            }
-        ]
-    };
-    const processData = (expenses) => {
-        const categoryMap = {};
+  const mergedDates = [
+    ...new Set([
+      ...Object.keys(groupedIncomes),
+      ...Object.keys(groupedExpenses),
+    ]),
+  ].sort((a, b) => new Date(a) - new Date(b));
 
-        expenses.forEach((expense) => {
-            if (categoryMap[expense.category]) {
-                categoryMap[expense.category] += expense.amount;
-            } else {
-                categoryMap[expense.category] = expense.amount;
-            }
-        });
+  const graphData = {
+    labels: mergedDates.map((date) => formatDate(date)),
+    datasets: [
+      {
+        label: "Income",
+        data: mergedDates.map((d) => groupedIncomes[d] || null),
+        borderColor: "green",
+        backgroundColor: "green",
+        tension: 0.4,
+        spanGaps: true,
+      },
+      {
+        label: "Expense",
+        data: mergedDates.map((d) => groupedExpenses[d] || null),
+        borderColor: "red",
+        backgroundColor: "red",
+        tension: 0.4,
+        spanGaps: true,
+      },
+    ],
+  };
 
-        const labels = Object.keys(categoryMap);
-        const data = Object.values(categoryMap);
+  /* ---------------- DOUGHNUT DATA ---------------- */
+  const categoryMap = {};
+  expenses.forEach((e) => {
+    categoryMap[e.category] = (categoryMap[e.category] || 0) + e.amount;
+  });
 
-        return {labels, data};
-    };
-
-    const {labels, data} = processData(expenses);
-    const chartData = {
-        labels: labels,
-        datasets: [
-            {
-                label: 'Expenses',
-                data: data,
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.2)',
-                    'rgba(54, 162, 235, 0.2)',
-                    'rgba(255, 206, 86, 0.2)',
-                    'rgba(75, 192, 192, 0.2)',
-                    'rgba(153, 102, 255, 0.2)',
-                    'rgba(255, 159, 64, 0.2)',
-                ],
-                borderColor: [
-                    'rgba(255, 99, 132, 1)',
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(255, 206, 86, 1)',
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(153, 102, 255, 1)',
-                    'rgba(255, 159, 64, 1)',
-                ],
-                borderWidth: 1,
-            },
+  const chartData = {
+    labels: Object.keys(categoryMap),
+    datasets: [
+      {
+        label: "Expenses",
+        data: Object.values(categoryMap),
+        backgroundColor: [
+          "rgba(255, 99, 132, 0.2)",
+          "rgba(54, 162, 235, 0.2)",
+          "rgba(255, 206, 86, 0.2)",
+          "rgba(75, 192, 192, 0.2)",
+          "rgba(153, 102, 255, 0.2)",
+          "rgba(255, 159, 64, 0.2)",
         ],
-    };
-    return (
-        <>
-            <Sidebar></Sidebar>
-            <DashboardContainer>
-                <LeftSection>
-                    <GraphPlaceholder>
-                        <Line data={graph}/>
-                    </GraphPlaceholder>
-                    <StatsContainer>
-                        <Card>
-                            <CardTitle>Total Income</CardTitle>
-                            <CardValue color="#28a745">{totalIncomes()} Rs</CardValue>
-                        </Card>
-                        <Card>
-                            <CardTitle>Total Expenses</CardTitle>
-                            <CardValue color="#dc3545">{totalExpenses()} Rs</CardValue>
-                        </Card>
-                        <Card>
-                            <CardTitle>Total Balance</CardTitle>
-                            <CardValue color="#28a745">{totalBalance()} Rs</CardValue>
-                        </Card>
-                    </StatsContainer>
-                </LeftSection>
+        borderWidth: 1,
+      },
+    ],
+  };
 
-                <RightSection>
-                    <GraphPlaceholder>
-                        <Doughnut data={chartData}/>
-                    </GraphPlaceholder>
-                    <Card style={{marginTop: "20px"}}>
-                        <CardTitle>Salary</CardTitle>
-                        <CardValue color="#333">
-                            <div>Min: {incomes.length ?
-                                Math.min(...incomes.map(item => item.amount)) : 0} Rs
-                            </div>
-                            <div>Max: {incomes.length ? Math.max(...incomes.map(item => item.amount)) : 0} Rs</div>
-                        </CardValue>
-                    </Card>
-                    <Card style={{marginTop: "20px"}}>
-                        <CardTitle>Expense</CardTitle>
-                        <CardValue color="#333">
-                            <div>Min: {expenses.length ? Math.min(...expenses.map(item => item.amount)) : 0} Rs</div>
-                            <div>Max: {expenses.length ? Math.max(...expenses.map(item => item.amount)) : 0} Rs</div>
-                        </CardValue>
-                    </Card>
-                </RightSection>
-            </DashboardContainer>
-        </>
-    );
+  return (
+    <>
+      <Sidebar />
+
+      <div className={styles.dashboard}>
+        <div className={styles.left}>
+          <div className={styles.graph}>
+            <Line data={graphData} />
+          </div>
+
+          <div className={styles.stats}>
+            <div className={styles.card}>
+              <h3 className={styles.cardTitle}>Total Income</h3>
+              <div className={`${styles.cardValue} ${styles.green}`}>
+                {totalIncomes} Rs
+              </div>
+            </div>
+
+            <div className={styles.card}>
+              <h3 className={styles.cardTitle}>Total Expenses</h3>
+              <div className={`${styles.cardValue} ${styles.red}`}>
+                {totalExpenses} Rs
+              </div>
+            </div>
+
+            <div className={styles.card}>
+              <h3 className={styles.cardTitle}>Total Balance</h3>
+              <div className={`${styles.cardValue} ${
+                totalBalance < 0 ? styles.red : styles.green
+                }`}>
+                {totalBalance} Rs
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className={styles.right}>
+          <div className={styles.graph}>
+            <Doughnut data={chartData} />
+          </div>
+
+          <div className={`${styles.card} ${styles.mt}`}>
+            <h3 className={styles.cardTitle}>Salary</h3>
+            <div className={styles.cardValue}>
+              <div>
+                Min:{" "}
+                {incomes.length
+                  ? Math.min(...incomes.map((i) => i.amount))
+                  : 0}{" "}
+                Rs
+              </div>
+              <div>
+                Max:{" "}
+                {incomes.length
+                  ? Math.max(...incomes.map((i) => i.amount))
+                  : 0}{" "}
+                Rs
+              </div>
+            </div>
+          </div>
+
+          <div className={`${styles.card} ${styles.mt}`}>
+            <h3 className={styles.cardTitle}>Expense</h3>
+            <div className={styles.cardValue}>
+              <div>
+                Min:{" "}
+                {expenses.length
+                  ? Math.min(...expenses.map((e) => e.amount))
+                  : 0}{" "}
+                Rs
+              </div>
+              <div>
+                Max:{" "}
+                {expenses.length
+                  ? Math.max(...expenses.map((e) => e.amount))
+                  : 0}{" "}
+                Rs
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
 };
 
 export default Dashboard;
